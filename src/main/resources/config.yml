@@ -33,6 +33,7 @@ worldguard-integration:
   enabled: true
   debug: false
 disable-paper-warning: false
+send-prompts-to-chat: false # This will send text input prompt messages also to the chat. It can resolve conflicts with other messages on the action bar.
 worlds:
   grace-time: 604800 # if a claim exists in a blacklisted world, the owner has this much time before it is removed (seconds)
   use-whitelist: false

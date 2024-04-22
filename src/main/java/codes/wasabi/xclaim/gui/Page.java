@@ -1,9 +1,11 @@
 package codes.wasabi.xclaim.gui;
 
+import codes.wasabi.xclaim.XClaim;
 import codes.wasabi.xclaim.platform.Platform;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -63,7 +65,11 @@ public abstract class Page {
         suspend();
         Player target = getTarget();
         target.playSound(target.getLocation(), Platform.get().getExpSound(), 1f, 1f);
-        awaitPrompt = prompt;
+        if (XClaim.mainConfig.getBoolean("send-prompts-to-chat", false)) {
+            Audience audience = Platform.getAdventure().player(target);
+            audience.sendMessage(XClaim.lang.getComponent(prompt).color(TextColor.color(255,255,0)));
+        }
+        awaitPrompt = XClaim.lang.get(prompt);
         awaitCallback = ((String s) -> {
             awaiting = false;
             parent.setShouldTick(ticking);
