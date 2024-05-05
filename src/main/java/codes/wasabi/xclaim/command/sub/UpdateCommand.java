@@ -17,10 +17,29 @@ import org.jetbrains.annotations.Range;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 public class UpdateCommand implements Command {
+
+    private static final Map<UUID, Optional<AutoUpdater.UpdateOption>> map = new ConcurrentHashMap<>();
+    public static String initialCheck() {
+        AutoUpdater.UpdateOption opt;
+        try {
+            opt = AutoUpdater.check();
+        } catch (Exception ignored) {
+            return null;
+        }
+        if (opt == null) return null;
+        map.put(new UUID(0L, 0L), Optional.of(opt));
+        return opt.updateOption();
+    }
+
+    public UpdateCommand() {
+        map.clear();
+    }
 
     @Override
     public @NotNull String getName() {
@@ -57,7 +76,6 @@ public class UpdateCommand implements Command {
         return false;
     }
 
-    private final Map<UUID, AutoUpdater.UpdateOption> map = new HashMap<>();
     @Override
     public void execute(@NotNull CommandSender sender, @NotNull Object @NotNull ... arguments) {
         Audience audience = Platform.getAdventure().sender(sender);
@@ -99,7 +117,7 @@ public class UpdateCommand implements Command {
                         return;
                     }
                 } else {
-                    opt = map.get(uuid);
+                    opt = map.get(uuid).orElse(null);
                 }
                 if (opt == null) {
                     audience.sendMessage(XClaim.lang.getComponent("cmd-update-none"));
@@ -132,7 +150,7 @@ public class UpdateCommand implements Command {
                     audience.sendMessage(XClaim.lang.getComponent("cmd-update-err-check"));
                     return;
                 }
-                map.put(uuid, opt);
+                map.put(uuid, Optional.ofNullable(opt));
                 if (opt == null) {
                     audience.sendMessage(XClaim.lang.getComponent("cmd-update-redundant"));
                     return;
